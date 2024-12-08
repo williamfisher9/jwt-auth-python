@@ -39,3 +39,11 @@ $ python
 source .venv/Scripts/activate
 py app.py
 ```
+
+```
+# Flask app can be started by running the below command without the need for app.run:
+flask --app app run --debug
+
+# or by adding app.run and then:
+py app.py
+```
