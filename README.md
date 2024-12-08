@@ -12,7 +12,7 @@ source .venv/Scripts/activate
 
 ```
 # install dependencies
-pip install Flask PyJWT
+pip install Flask PyJWT Flask_SQLAlChemy
 ```
 
 ```
@@ -26,3 +26,15 @@ pip freeze > requirements.txt
 pip install -r requirements.txt
 ```
 
+```
+# run the below commands to create sqlite3 database and model tables
+$ python
+>>> from app import app, db
+>>> with app.app_context():
+>>>     db.create_all()
+```
+
+```
+# start the app by running the commands
+py app.py
+```
