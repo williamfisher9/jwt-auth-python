@@ -1,1 +1,13 @@
 backend/__pycache__
+
+backend/.env
+backend/.venv
+backend/env/
+backend/venv/
+backend/ENV/
+backend/env.bak/
+backend/venv.bak/
+
+# Flask stuff:
+backend/instance/
+backend/.webassets-cache

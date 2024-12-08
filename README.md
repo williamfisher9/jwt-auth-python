@@ -1,5 +1,21 @@
 # JWT authentication using Flask
 An application to secure a Flask REST API using JWT authentication
+
+## Running the App:
+1. Clone the repository
+2. Create a virtual environment `py -m venv .venv`
+3. Run the virtual environment profile `source .venv/Scripts/activate`
+4. Install the dependencies `pip install -r requirements.txt`
+5. Create the database and models:
+    ```
+        $ python
+        >>> from app import app, db
+        >>> with app.app_context():
+        >>>     db.create_all()
+    ```
+6. Start the app `py app.py` or `flask --app app run --debug`
+
+## General Info:
 ```
 # create a virtual environment profile int he backend folder
 py -m venv .venv
