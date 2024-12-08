@@ -35,6 +35,7 @@ $ python
 ```
 
 ```
-# start the app by running the commands
+# start the app by running the commands int he project folder
+source .venv/Scripts/activate
 py app.py
 ```
