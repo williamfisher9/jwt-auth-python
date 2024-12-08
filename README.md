@@ -1,1 +1,1 @@
-# jwt-auth-python
+# JJWT authentication using Flask
