@@ -59,37 +59,80 @@ class ErrorResponse():
         }
         
     
-@app.route('/api/v1/users', methods=['GET', 'POST'])
-def handle_get_and_post():
+@app.route('/api/v1/users/register', methods=['POST'])
+def handle_register_request():
+    """
     if request.method == 'GET':
         users = UserModel.query.all()
         print(type(users))
         return jsonify([ob.to_dict() for ob in users])
-    
+    """
     if request.method == 'POST':
         user = UserModel(username = request.json['username'], 
                          firstName = request.json['firstName'], 
                          lastName = request.json['lastName'], 
                          password = bcrypt.generate_password_hash(request.json['password']).decode('utf-8'))
+        
         try:
             db.session.add(user)
             db.session.commit()
         except IntegrityError as exc:
-            print("exception occurred")
-            error = ErrorResponse(repr(exc), 401)
-            logger.info('Started')
-            return jsonify(error.to_dict())
+            error = ErrorResponse(repr(exc), 409)
+            logger.info(repr(exc))
+            return jsonify(error.to_dict()), 409
+        
         print(user)
-        return jsonify(user.to_dict())
+        return jsonify(user.to_dict()), 201
     
-@app.route('/api/v1/users/<id>', methods=['DELETE', 'PATCH'])
-def handle_delete_and_patch(id):
+@app.route('/api/v1/users/login', methods=['POST'])
+def handle_login_request():
+    try:
+        username = request.get_json()['username']
+        password = request.get_json()['password']
+        
+        if not username or not password:
+            return ErrorResponse('username/password is null', 403).to_dict()
+        
+        users = UserModel.query.all()
+        user = None
+        for user in users:
+            if user.username == username:
+                user = user
+                break
+        
+        if not user:
+            return ErrorResponse('user was not found', 403).to_dict()
+        
+        if not bcrypt.check_password_hash(user.password, password):
+            return ErrorResponse('invalid password', 403).to_dict()
+        else:
+            return 'success'
+        
+    except KeyError as exc:
+        return ErrorResponse(repr(exc), 403).to_dict()
+    
+    
+@app.route('/api/v1/users/<id>', methods=['DELETE', 'PATCH', 'GET'])
+def handle_get_delete_and_patch(id):
+    if request.method == 'GET':
+        user = UserModel.query.filter_by(id=id).first()
+        if not user:
+            return ErrorResponse("not found" ,404).to_dict(), 404
+           
+        return jsonify(user.to_dict()), 200
+    
     if request.method == 'DELETE':
         user = UserModel.query.filter_by(id=id).first()
         if not user:
-            return {"error": 'not found'}, 404
-        db.session.delete(user)
-        db.session.commit()
+            return ErrorResponse("not found" ,404).to_dict(), 404
+        
+        try:
+            db.session.delete(user)
+            db.session.commit()
+        except IntegrityError as exc:
+            error = ErrorResponse(repr(exc), 409)
+            logger.info(repr(exc))
+            return jsonify(error.to_dict()), 409
         
         users = UserModel.query.all()
         return jsonify([ob.to_dict() for ob in users]), 202
@@ -97,13 +140,17 @@ def handle_delete_and_patch(id):
     if request.method == 'PATCH':
         user = UserModel.query.filter_by(id=id).first()
         if not user:
-            return {"error": "not found"}, 404
-        
+            return ErrorResponse("not found" ,404).to_dict(), 404
         request_params = request.get_json()
         for attr in request_params:
-            print(attr)
-            print(request_params[attr])
             setattr(user, attr, request_params[attr])
-        db.session.add(user)
-        db.session.commit()
+        
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError as exc:
+            error = ErrorResponse(repr(exc), 409)
+            logger.info(repr(exc))
+            return jsonify(error.to_dict()), 409
+        
         return user.to_dict(), 202
