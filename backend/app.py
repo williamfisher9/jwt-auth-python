@@ -2,9 +2,15 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase
-import json
+from sqlalchemy.exc import IntegrityError
+from flask_bcrypt import Bcrypt
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='app_info_log.log', level=logging.INFO)
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 
 class Base(DeclarativeBase):
@@ -23,7 +29,7 @@ class UserModel(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     firstName = db.Column(db.String(80), nullable = False)
     lastName = db.Column(db.String(80), nullable = False)
-    username = db.Column(db.String(80), nullable = False)
+    username = db.Column(db.String(80), nullable = False, unique = True)
     password = db.Column(db.String(80), nullable = False)
     
     def __str__(self):
@@ -40,6 +46,18 @@ class UserModel(db.Model):
             "username": self.username, 
             "password": self.password
             }
+        
+class ErrorResponse():
+    def __init__(self, message, status):
+        self.message = message
+        self.status = status
+    
+    def to_dict(self):
+        return {
+            "message": self.message,
+            "status": self.status
+        }
+        
     
 @app.route('/api/v1/users', methods=['GET', 'POST'])
 def handle_get_and_post():
@@ -52,9 +70,15 @@ def handle_get_and_post():
         user = UserModel(username = request.json['username'], 
                          firstName = request.json['firstName'], 
                          lastName = request.json['lastName'], 
-                         password = request.json['password'])
-        db.session.add(user)
-        db.session.commit()
+                         password = bcrypt.generate_password_hash(request.json['password']).decode('utf-8'))
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError as exc:
+            print("exception occurred")
+            error = ErrorResponse(repr(exc), 401)
+            logger.info('Started')
+            return jsonify(error.to_dict())
         print(user)
         return jsonify(user.to_dict())
     

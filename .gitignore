@@ -8,6 +8,8 @@ backend/ENV/
 backend/env.bak/
 backend/venv.bak/
 
+backend/*.log
+
 # Flask stuff:
 backend/instance/
 backend/.webassets-cache

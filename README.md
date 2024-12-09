@@ -63,3 +63,8 @@ flask --app app run --debug
 # or by adding app.run and then:
 py app.py
 ```
+
+```
+# Hash passwords using bcrypt
+pip install Flask-Bcrypt
+```
