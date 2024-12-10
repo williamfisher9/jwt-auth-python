@@ -68,3 +68,15 @@ py app.py
 # Hash passwords using bcrypt
 pip install Flask-Bcrypt
 ```
+
+### Marshmallow and SQLAlchemy
+- Marshmallow “converts” (deserializes) dicts to SQLAlchemy models or serializes SQLAlchemy models to dicts.
+- SQLAlchemy is an ORM. It maps database schema (tables) and data to Python objects.
+- The two packages complement each other. They cannot and do not replace each others’ functionality.
+- Flask-Marshmallow gives you a convenient interface to Marshmallow under Flask.
+- They are regarded as one of the best packages to use for the problems they solve.
+
+### In short, marshmallow schemas can be used to:
+- Validate input data.
+- Deserialize input data to app-level objects.
+- Serialize app-level objects to primitive Python types. The serialized objects can then be rendered to standard formats such as JSON for use in an HTTP API.
